@@ -1,0 +1,20 @@
+.season-menu {
+    margin-top: 32px;
+    margin-bottom: 16px;
+    min-height: 50px;
+    text-align: left;
+    display: flex;
+}
+
+.season-select {
+    font: bold 20px var(--font-name);
+    padding: 8px 20px;
+    border-radius: 8px;
+    background-color: rgb(5, 15, 15);
+    border: 2px solid white;
+    color: white;
+    box-shadow: -2px -2px salmon;
+    outline: none;
+    margin-bottom: 24px;
+    margin-right: 48px;
+}

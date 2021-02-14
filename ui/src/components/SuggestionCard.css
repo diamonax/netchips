@@ -1,0 +1,45 @@
+.suggestion-card {
+    cursor: pointer;
+    margin: 16px 4px;
+    display: inline-block;
+    font: 13px var(--font-name);
+    text-align: center;
+    padding: 16px 12px;
+    width: 150px;
+    /*height: 200px;*/
+    color: white;
+    background-color: rgb(200, 200, 200, 0.1);
+    transition: border-radius 0.4s, background-color 0.4s;
+}
+
+.suggestion-card:hover {
+    background-color: rgba(255, 255, 255, 0);
+    /*rgba(255, 140, 105, 0.3);*/
+    border-radius: 12px;
+}
+
+.suggestion-card img {
+    height: 190px;
+    width: 130px;
+    margin-bottom: 16px;
+    /*box-shadow: 2px 2px salmon;*/
+    border-radius: 16px;
+    box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.8);
+    transition: box-shadow 0.4s;
+}
+
+.suggestion-card:hover img {
+    box-shadow: 0px 0px 6px 6px rgba(0, 128, 255, 0.99);
+}
+
+.suggestion-card-title {
+    height: 40px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.suggestion-card-info {
+    font-size: 12px;
+    color: rgb(140, 140, 140);
+    margin-top: 8px;
+}

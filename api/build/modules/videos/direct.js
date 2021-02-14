@@ -1,0 +1,122 @@
+const _ = require("lodash");
+const tools = require("../tools.js");
+const { getProviderVideo } = require("./direct_providers.js");
+
+module.exports = {
+    getMovieUrls,
+    getSeriesUrls,
+};
+
+const ORIGIN = Buffer.from("aHR0cHM6Ly9hcGkuMTIzbW92aWUuc2hvdw==", "base64").toString();
+const SITE_PARAM = "site=30802b";
+
+async function search(title) {
+    const query = encodeURIComponent(tools.normalizeTitle(title));
+    const url = `${ORIGIN}/search?keyword=${query}&${SITE_PARAM}`;
+
+    const data = await tools.getJson(url);
+    if (!data || data.contents?.length === 0) return null;
+
+    return data.contents;
+}
+
+async function getMovieUrls({ title, year }) {
+    const list = await search(title);
+    if (!list) return null;
+
+    const seasonHash = list.find((x) => {
+        const released = parseInt(x.released?.slice(0, 4));
+        if (!isNaN(released) && !tools.windowRange(released, year, 1)) return false;
+        const index = x.name.indexOf(" - Season ");
+        if (index >= 0) return false;
+        const name = x.name;
+        return tools.areTitlesEqual(title, name);
+    })?.hash;
+    if (!seasonHash) return [];
+
+    const seasonUrl = `${ORIGIN}/contents/episodes?hash=${seasonHash}&${SITE_PARAM}`;
+
+    let data = await tools.getJson(seasonUrl);
+    if (!data || data.episodes?.length === 0) return [];
+
+    const episodeHash = data.episodes[0]?.episode_hash;
+    if (!episodeHash) return [];
+
+    const episodeUrl = `${ORIGIN}/episodes/embeds?hash=${episodeHash}&${SITE_PARAM}`;
+
+    data = await tools.getJson(episodeUrl);
+    if (!data || data.embeds?.length === 0) return [];
+
+    const providers = await Promise.all(data.embeds.map(async (x) => {
+        const url = `${ORIGIN}/embed?hash=${x.hash}&${SITE_PARAM}`;
+
+        const data = await tools.getJson(url);
+        if (!data || !data.url) return null;
+
+        let response = null;
+        try {
+            response = await getProviderVideo({ url: data.url });
+        } catch (err) {}
+        if (!response) return null;
+
+        return {
+            videoUrl: response.url,
+            url: data.url,
+            provider: x.part_of?.toLowerCase(),
+        };
+    }));
+    console.log(providers.filter((x) => x).map((x) => x.url));
+    return _.uniq(providers.filter((x) => x).map((x) => x.videoUrl));
+}
+
+async function getSeriesUrls({ title, season, episode }) {
+    const list = await search(title);
+    if (!list) return null;
+
+    const seasonHash = list.find((x) => {
+        const [name, seasonString] = x.name.split(" - Season ");
+        if (!name || !seasonString) return false;
+        const seasonNumber = parseInt(seasonString);
+        if (isNaN(seasonNumber)) return false;
+        return tools.areTitlesEqual(title, name) && season === seasonNumber;
+    })?.hash;
+    if (!seasonHash) return [];
+
+    const seasonUrl = `${ORIGIN}/contents/episodes?hash=${seasonHash}&${SITE_PARAM}`;
+
+    let data = await tools.getJson(seasonUrl);
+    if (!data || data.episodes?.length === 0) return [];
+
+    const episodeHash = data.episodes.find((x) => {
+        const episodeNumber = parseInt(x.name);
+        if (isNaN(episodeNumber)) return false;
+        return episode === episodeNumber;
+    })?.episode_hash;
+    if (!episodeHash) return [];
+
+    const episodeUrl = `${ORIGIN}/episodes/embeds?hash=${episodeHash}&${SITE_PARAM}`;
+
+    data = await tools.getJson(episodeUrl);
+    if (!data || data.embeds?.length === 0) return [];
+
+    const providers = await Promise.all(data.embeds.map(async (x) => {
+        const url = `${ORIGIN}/embed?hash=${x.hash}&${SITE_PARAM}`;
+
+        const data = await tools.getJson(url);
+        if (!data || !data.url) return null;
+
+        let response = null;
+        try {
+            response = await getProviderVideo({ url: data.url });
+        } catch (err) {}
+        if (!response) return null;
+
+        return {
+            videoUrl: response.url,
+            url: data.url,
+            provider: x.part_of?.toLowerCase(),
+        };
+    }));
+    console.log(providers.filter((x) => x).map((x) => x.url));
+    return _.uniq(providers.filter((x) => x).map((x) => x.videoUrl));
+}

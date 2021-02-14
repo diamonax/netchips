@@ -1,0 +1,7 @@
+{
+    "main": "build/main.js",
+    "dependencies": {
+        "vlc-command": "1.2.0",
+        "webtorrent-cli": "3.2.1"
+    }
+}

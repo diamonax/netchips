@@ -1,0 +1,69 @@
+html {
+    --scrollbarBG: rgb(40, 40, 40);
+    --thumbBG: rgb(80, 80, 80);
+}
+
+body {
+    --font-name: 'Noto Sans KR', Exo, Verdana, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    background-color: rgba(6, 19, 20, 1);
+    font: 16px var(--font-name);
+    color: rgb(210, 210, 210);
+    cursor: default;
+    scrollbar-color: black gray;
+    overflow-y: scroll;
+    margin-bottom: 64px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--thumbBG) var(--scrollbarBG);
+}
+
+body::-webkit-scrollbar {
+    width: 14px;
+}
+
+body::-webkit-scrollbar-track {
+    background: var(--scrollbarBG);
+}
+
+body::-webkit-scrollbar-thumb {
+    background-color: var(--thumbBG);
+    border-radius: 6px;
+    border: 3px solid var(--scrollbarBG);
+}
+
+input[type=radio] {
+    cursor: pointer;
+}
+
+.image-logo {
+    display: inline-block;
+    height: 38px;
+    margin-right: 16px;
+}
+
+.message-loading {
+    margin-top: 96px;
+    font-size: 24px;
+    font-style: italic;
+}
+
+.message-not-found {
+    margin-top: 96px;
+    font-size: 24px;
+    color: salmon;
+}
+
+.message-error {
+    margin-top: 96px;
+    font-size: 24px;
+    font-weight: bold;
+    color: red;
+}
+
+.spinner {
+    display: block;
+    margin-top: 64px;
+    opacity: 0.8;
+}
