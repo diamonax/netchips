@@ -32,7 +32,7 @@ async function update() {
         return;
     }
 
-    const tree = getRemoteFileTree();
+    const tree = await getRemoteFileTree();
     await Promise.all(modulesToUpdate.map(async (moduleName) => {
         console.log(`Updating ${moduleName} ...`);
         await updateModule(tree, moduleName);
@@ -47,36 +47,36 @@ async function updateModule(tree, moduleName) {
     const root = `${moduleName}/build`;
 
     const localModuleDirectory = path.join(ROOT_DIRECTORY, root);
-    console.log("rmdir", localModuleDirectory);//fs.rmdirSync(localModuleDirectory, { recursive: true });
+    fs.rmdirSync(localModuleDirectory, { recursive: true });
 
     for (let i = 0; i < tree.length; i++) {
         const { path: pathname, type } = tree[i];
 
-        if (!path.startsWith(root)) {
+        if (!pathname.startsWith(root)) {
             continue;
         }
 
         const localFullPath = path.join(ROOT_DIRECTORY, pathname);
 
         if (type === "tree") {
-            console.log("mkdir", localFullPath);//fs.mkdirSync(localFullPath, { recursive: true });
+            fs.mkdirSync(localFullPath, { recursive: false });
         }
         
         if (type === "blob") {
             const remoteContents = await readRemoteFile(pathname);
-            console.log("writeFile", localFullPath, remoteContents.length);//fs.writeFileSync(localFullPath, remoteContents);
+            fs.writeFileSync(localFullPath, remoteContents);
         }
     }
 }
 
 async function getRemoteFileTree() {
-    const url = "https://api.github.com/repos/bauwen/netchips/git/trees/latest?recursive=1";
+    const url = "https://api.github.com/repos/diamonax/netchips/git/trees/latest?recursive=1";
     const json = await request(url);
     return JSON.parse(json).tree;
 }
 
 async function readRemoteFile(pathname) {
-    const url = `https://raw.githubusercontent.com/bauwen/netchips4/latest/${pathname}`;
+    const url = `https://raw.githubusercontent.com/diamonax/netchips/latest/${pathname}`;
     return await request(url);
 }
 

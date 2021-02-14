@@ -4,7 +4,7 @@ The frontend for Netchips.
 
 ## Modes
 
-The files can be deployed in two environments: a standard browser or Electron. When deployed with Netchips' App module, which uses Electron, the `window` object contains an extra property called `app` that can be used to call some functions defined in the App "backend" (i.e. to start VLC or WebTorrent). When deployed on the web however, it will not have the ability to open the videos in VLC. Instead, it will just provide you with the video URIs and the ability to download the subtitles separately.
+The files can be deployed in two environments: a standard web browser or Electron. When deployed with Netchips' App module, which uses Electron, the `window` object contains an extra property called `app` that can be used to call some functions defined in the App "backend" (i.e. to start VLC or WebTorrent). When deployed on the web however, it will not have the ability to open the videos in VLC. Instead, it will just provide you with the video URIs and the ability to download the subtitles separately.
 
 ## Development
 
