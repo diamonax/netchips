@@ -24,11 +24,9 @@ async function getPopularSeries() {
 
 async function getPopular(url) {
     const html = await tools.getHtml(url);
-
-    if (!html) return null;
+    const $ = tools.cheerio.load(html);
 
     const results = [];
-    const $ = tools.cheerio.load(html);
 
     const table = $("tbody.lister-list").eq(0);
     $("tr", table).each((i, tr) => {
@@ -85,12 +83,11 @@ async function searchSeries({ query }) {
 async function search(keyword, searchingSeries) {
     const query = encodeURIComponent(keyword.trim().toLowerCase());
     const url = `${ORIGIN}/find?q=${query}&s=tt&ttype=${searchingSeries ? "tv" : "ft"}`;
-
+    
     const html = await tools.getHtml(url);
-    if (!html) return null;
+    const $ = tools.cheerio.load(html);
 
     const results = [];
-    const $ = tools.cheerio.load(html);
 
     const table = $("table.findList").eq(0);
     $("tr", table).each((i, tr) => {
@@ -160,8 +157,6 @@ async function search(keyword, searchingSeries) {
 
 async function getMovieInformation({ url }, searchingSeries = false) {
     const html = await tools.getHtml(url);
-     if (!html) return null;
-
     const $ = tools.cheerio.load(html);
 
     const h1 = $("h1").eq(0);
@@ -248,14 +243,11 @@ async function getMovieInformation({ url }, searchingSeries = false) {
 
 async function getSeriesInformation({ url }) {
     const results = await getMovieInformation({ url }, true);
-    if (!results) return null;
 
     results.seasons = [];
     const episodesUrl = tools.joinUrl(url, "episodes");
 
     const html = await tools.getHtml(episodesUrl);
-    if (!html) return null;
-
     const $ = tools.cheerio.load(html);
 
     const select = $("#bySeason").eq(0);
@@ -278,7 +270,6 @@ async function getSeriesInformation({ url }) {
 
 async function getSeasonEpisodes({ url }) {
     const html = await tools.getHtml(url);
-    if (!html) return null;
 
     const episodes = [];
     const $ = tools.cheerio.load(html);

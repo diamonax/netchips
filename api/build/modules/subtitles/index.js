@@ -30,12 +30,11 @@ async function getSeriesSubtitles({ title, season, episode }) {
         "/episode-" + episode +
         `/moviename-${name}`;
 
-        return collectSubtitles(url);
+    return collectSubtitles(url);
 }
 
 async function collectSubtitles(url) {
     const finalUrl = await tools.followRedirections(url);
-    if (!finalUrl) return "";
 
     if (finalUrl.indexOf("/subtitles/") >= 0) {
         const downloadUrl = await fetchDownloadUrl(finalUrl);
@@ -48,35 +47,30 @@ async function collectSubtitles(url) {
 
 async function fetchDownloadUrl(url) {
     const html = await tools.getHtml(url);
-    if (!html) return "";
-
     const $ = tools.cheerio.load(html);
     const a = $('a[itemprop="url"][title="Download"]').eq(0);
 
     if (a && a.attr("href")) {
         return tools.joinUrl(ORIGIN, a.attr("href"));
-    } else {
-        return "";
     }
+
+    throw new Error(`couldn't fetch subtitles download url for url: ${url}`);
 }
 
 async function fetchDownloadPageUrl(url) {
     const html = await tools.getHtml(url);
-    if (!html) return "";
-
     const $ = tools.cheerio.load(html);
     const a = $("a.bnone").eq(0);  // n
 
     if (a && a.attr("href")) {
         return tools.joinUrl(ORIGIN, a.attr("href"));
-    } else {
-        return "";
     }
+
+    throw new Error(`couldn't fetch subtitles download page url for url: ${url}`);
 }
 
 async function fetchSrt(url) {
     const buffer = await tools.getBuffer(url);
-    if (!buffer) return "";
 
     try {
         const zip = new AdmZip(buffer);
@@ -88,9 +82,9 @@ async function fetchSrt(url) {
                 return entry.getData().toString("utf8");
             }
         }
-
-        return "";
     } catch (err) {
-        return "";
+        throw new Error(`couldn't unzip subtitles file for url: ${url} (${err.message})`);
     }
+
+    throw new Error(`couldn't find srt file in zip for url: ${url}`);
 }

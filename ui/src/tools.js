@@ -15,13 +15,21 @@ export async function request(endpoint, data = {}) {
             },
             body: JSON.stringify(data),
         });
-        if (response.status >= 300) {
-            throw new Error(await response.text());
+
+        const result = await response.json();
+
+        if (result.error) {
+            throw new Error(result.error);
         }
-        return { value: await response.json() };
+
+        if (result.value === undefined) {
+            throw new Error("invalid response");
+        }
+        
+        return result;
     } catch (err) {
-        console.log("Request error:", err);
-        return { error: err };
+        console.log("Request Error:", err.message);
+        return { error: true };
     }
 }
 

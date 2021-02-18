@@ -7,7 +7,6 @@ module.exports = {
 const scrapers = {
     "vidnext/load.php": async (url) => {
         const html = await tools.getHtml(url);
-        if (!html) return null;
 
         let position = html.indexOf(".m3u8'");
         if (position < 0) {
@@ -16,20 +15,25 @@ const scrapers = {
         }
 
         const videoUrl = tools.pullString(html, position, "'");
-        if (!videoUrl || videoUrl.length === html.length) return null;
+        if (!videoUrl || videoUrl.length === html.length) {
+            throw new Error(`no video url found in html for url: ${url}`);
+        }
 
         return { url: videoUrl };
     },
 
     "vidnext/streaming.php": async (url) => {
         const html = await tools.getHtml(url);
-        if (!html) return null;
 
         const position = html.indexOf("vidnext.net/loadserver.php");
-        if (position < 0) return null;
+        if (position < 0) {
+            throw new Error(`no 'vidnext.net/loadserver.php' found in html for url: ${url}`);
+        }
 
         let vidnextUrl = tools.pullString(html, position, '"');
-        if (!vidnextUrl || vidnextUrl.length === html.length) return null;
+        if (!vidnextUrl || vidnextUrl.length === html.length) {
+            throw new Error(`no vidnext url found in html for url: ${url}`);
+        }
 
         if (vidnextUrl.startsWith("//")) {
             vidnextUrl = "https:" + vidnextUrl;
@@ -42,10 +46,11 @@ const scrapers = {
         const { hostname } = new URL(url);
         const hash = url.slice(url.lastIndexOf("/") + 1);
         const data = await tools.getJson(`https://${hostname}/get_stream?video_hash=${hash}`);
-        if (!data) return null;
 
         const videoUrl = data.sources?.[0]?.file;
-        if (!videoUrl) return null;
+        if (!videoUrl) {
+            throw new Error(`no video url found in json for url: ${url}`);
+        }
 
         return { url: videoUrl };
     },

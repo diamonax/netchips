@@ -27,7 +27,7 @@ function getSubtitlesFilename({ type, title, season, episode }) {
 
     const filename = type === "movies" 
         ? `${sanitizedTitle}.srt`
-        : `${sanitizedTitle}_S${season}E${episode}.srt`;
+        : `${sanitizedTitle}_S${season < 10 ? "0" : ""}${season}E${episode < 10 ? "0" : ""}${episode}.srt`;
 
     return path.join(DIRECTORY_SUBTITLES, filename);    
 }

@@ -67,55 +67,50 @@ function joinUrl(base, rel) {
 }
 
 async function getBuffer(link, headers = {}) {
-    const { error, buffer } = await request(link, {
-        method: "GET",
-        headers,
-    });
-    if (error || !buffer || buffer.length === 0) {
-        return null;
+    try {
+        const { buffer } = await request(link, {
+            method: "GET",
+            headers,
+        });
+        return buffer;
+    } catch (err) {
+        throw new Error(`couldn't fetch data for url: ${link} (${err.message})`);
     }
-    return buffer;
 }
 
 async function getHtml(link, headers = {}) {
     const buffer = await getBuffer(link, headers);
-    if (!buffer) {
-        return "";
-    }
     const html = buffer.toString();
     return html;
 }
 
 async function getJson(link, headers = {}) {
     const buffer = await getBuffer(link, headers);
-    if (!buffer) {
-        return null;
-    }
     try {
         const json = buffer.toString();
         const data = JSON.parse(json);
         return data;
     } catch (err) {
-        return null;
+        throw new Error(`fetched invalid json for url: ${link}`);
     }
 }
 
 async function followRedirections(link, depth = 0) {
     if (depth > 5) {
-        return "";
+        throw new Error("redirection depth exceeded");
     }
 
     let parsedUrl;
     try {
         parsedUrl = new URL(link);
     } catch (err) {
-        return "";
+        throw new Error("invalid request url");
     }
 
     const protocol = parsedUrl.protocol;
     const httplib = protocol === "http:" ? http : https;
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const req = httplib.request(link, {
             method: "HEAD",
             headers: {
@@ -124,11 +119,11 @@ async function followRedirections(link, depth = 0) {
                 "Referer": link,
                 "Origin": parsedUrl.origin,
             }
-        }, (response) => {
-            const code = response.statusCode;
+        }, (res) => {
+            const code = res.statusCode;
 
             if (300 <= code && code <= 400) {
-                const location = response.headers["location"];
+                const location = res.headers["location"];
                 const newUrl = url.resolve(link, location);
 
                 setTimeout(() => {
@@ -139,8 +134,8 @@ async function followRedirections(link, depth = 0) {
             }
         });
 
-        req.on("error", () => {
-            resolve("");
+        req.on("error", (err) => {
+            reject(err);
         });
 
         req.end();
@@ -149,14 +144,14 @@ async function followRedirections(link, depth = 0) {
 
 async function request(link, options, depth = 0) {
     if (depth > 3) {
-        return { error: new Error("depth exceeded") };
+        throw new Error("depth exceeded");
     }
 
     let parsedUrl;
     try {
         parsedUrl = new URL(link);
     } catch (err) {
-        return { error: new Error("invalid request URL") };
+        throw new Error("invalid request url");
     }
 
     const completeOptions = {
@@ -178,24 +173,24 @@ async function request(link, options, depth = 0) {
     const protocol = parsedUrl.protocol;
     const httplib = protocol === "http:" ? http : https;
 
-    return new Promise((resolve) => {
-        const req = httplib.request(link, completeOptions, (response) => {
-            const code = response.statusCode;
+    return new Promise((resolve, reject) => {
+        const req = httplib.request(link, completeOptions, (res) => {
+            const code = res.statusCode;
 
             if (200 <= code && code < 300) {
-                let output = response;
+                let output = res;
 
-                switch (response.headers["content-encoding"]) {
+                switch (res.headers["content-encoding"]) {
                     case "gzip":
-                        output = response.pipe(zlib.createGunzip());
+                        output = res.pipe(zlib.createGunzip());
                         break;
 
                     case "deflate":
-                        output = response.pipe(zlib.createInflate());
+                        output = res.pipe(zlib.createInflate());
                         break;
 
                     case "br":
-                        output = response.pipe(zlib.createBrotliDecompress());
+                        output = res.pipe(zlib.createBrotliDecompress());
                         break;
                 }
 
@@ -207,23 +202,23 @@ async function request(link, options, depth = 0) {
 
                 output.on("end", () => {
                     const buffer = Buffer.concat(chunks);
-                    const headers = response.headers;
+                    const headers = res.headers;
                     resolve({ buffer, headers });
                 });
 
                 output.on("error", (err) => {
-                    resolve({ error: err });
+                    reject(err);
                 });
             }
             else if (300 <= code && code < 400) {
-                const location = response.headers["location"];
+                const location = res.headers["location"];
                 const newLink = url.resolve(link, location);
                 setTimeout(() => {
                     request(newLink, options, depth + 1).then(resolve);
                 }, 0);
             }
             else {
-                resolve({ error: new Error("http error code") });
+                reject(new Error(`http error code ${code}`));
             }
         });
 
@@ -233,7 +228,7 @@ async function request(link, options, depth = 0) {
                     request(link, options, depth + 1).then(resolve);
                 }, 500);
             } else {
-                resolve({ error: err });
+                reject(err);
             }
         });
 

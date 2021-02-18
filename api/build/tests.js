@@ -1,6 +1,6 @@
-const search = require("./services/search");
-const subtitles = require("./services/subtitles");
-const videos = require("./services/videos");
+const search = require("./modules/search");
+const subtitles = require("./modules/subtitles");
+const videos = require("./modules/videos");
 
 const tests = {
     "search: fetching popular movies": async () => {

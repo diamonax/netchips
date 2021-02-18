@@ -29,7 +29,7 @@ type Information = {
     genres:      string[]  // a list of genres
     image:       string    // a poster image URL
     rating:      number    // a rating between 0 and 10
-	title:       string    // the title
+    title:       string    // the title
     year:        number    // the release year
 }
 ```
@@ -133,21 +133,14 @@ Represents the subtitles for a movie or series in SRT format.
 ### Functions
 
 ```
-function getMovieSubtitles({
-    title: string,
-    year:  number,
-}): Promise<Subtitles>
+function getMovieSubtitles({ title: string, year: number }): Promise<Subtitles>
 ```
 Returns the subtitles for a movie represented by its title and year of release. Throws an error if it is unable to do so.
 
 ---
 
 ```
-function getSeriesSubtitles({
-    title:   string,
-    season:  number,
-    episode: number,
-}): Promise<Subtitles>
+function getSeriesSubtitles({ title: string, season: number, episode: number }): Promise<Subtitles>
 ```
 Returns the subtitles for a series episode represented by the series title, the season number and the episode number. Throws an error if it is unable to do so.
 
@@ -166,7 +159,7 @@ Represents a direct URL to either an MP4 or M3U8 file.
 
 ```
 type TorrentResource = {
-	quality: "480p" | "720p" | "1080p",
+    quality: "480p" | "720p" | "1080p",
     url:     string,
 }
 ```
@@ -176,41 +169,27 @@ Represents information about a torrent file, i.e. the quality of the video and a
 ### Functions
 
 ```
-function getMovieUrls({
-    title: string,
-    year:  number,
-}): Promise<UrlResource[]>
+function getMovieUrls({ title: string, year: number }): Promise<UrlResource[]>
 ```
 Returns a list of URL resources for a movie represented by its title and year of release. Throws an error if it is unable to do so.
 
 ---
 
 ```
-function getSeriesUrls({
-    title: string,
-    season:  number,
-    episode: number,
-}): Promise<UrlResource[]>
+function getSeriesUrls({ title: string, season: number, episode: number }): Promise<UrlResource[]>
 ```
 Returns a list of URL resources for a series episode represented by the series title, the season number and the episode number. Throws an error if it is unable to do so.
 
 ---
 
 ```
-function getMovieTorrents({
-    title: string,
-    year:  number,
-}): Promise<TorrentResource[]>
+function getMovieTorrents({ title: string, year: number }): Promise<TorrentResource[]>
 ```
 Returns a list of torrent resources for a movie represented by its title and year of release. Throws an error if it is unable to do so.
 
 ---
 
 ```
-function getSeriesTorrents({
-    title: string,
-    season:  number,
-    episode: number,
-}): Promise<TorrentResource[]>
+function getSeriesTorrents({ title: string, season: number, episode: number }): Promise<TorrentResource[]>
 ```
 Returns a list of torrent resources for a series episode represented by the series title, the season number and the episode number. Throws an error if it is unable to do so.

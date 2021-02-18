@@ -15,14 +15,15 @@ async function search(title) {
     const url = `${ORIGIN}/search?keyword=${query}&${SITE_PARAM}`;
 
     const data = await tools.getJson(url);
-    if (!data || data.contents?.length === 0) return null;
+    if (data.contents?.length === 0) {
+        throw new Error(`no 'contents' in fetched json for url: ${url}`);
+    }
 
     return data.contents;
 }
 
 async function getMovieUrls({ title, year }) {
     const list = await search(title);
-    if (!list) return null;
 
     const seasonHash = list.find((x) => {
         const released = parseInt(x.released?.slice(0, 4));
@@ -65,13 +66,12 @@ async function getMovieUrls({ title, year }) {
             provider: x.part_of?.toLowerCase(),
         };
     }));
-    console.log(providers.filter((x) => x).map((x) => x.url));
+
     return _.uniq(providers.filter((x) => x).map((x) => x.videoUrl));
 }
 
 async function getSeriesUrls({ title, season, episode }) {
     const list = await search(title);
-    if (!list) return null;
 
     const seasonHash = list.find((x) => {
         const [name, seasonString] = x.name.split(" - Season ");
@@ -117,6 +117,6 @@ async function getSeriesUrls({ title, season, episode }) {
             provider: x.part_of?.toLowerCase(),
         };
     }));
-    console.log(providers.filter((x) => x).map((x) => x.url));
+
     return _.uniq(providers.filter((x) => x).map((x) => x.videoUrl));
 }

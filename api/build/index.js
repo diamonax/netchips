@@ -25,11 +25,12 @@ function startServer(port) {
     });
 }
 
-// 404 instead everywhere?
-
 function requestHandler(request, response) {
     console.log(request.method, request.url);
-    response.setHeader("access-control-allow-origin", "*");
+    response.writeHead(200, {
+        "content-type": "application/json",
+        "access-control-allow-origin": "*",
+    });
     
     if (request.method === "POST") {
         const chunks = [];
@@ -42,42 +43,36 @@ function requestHandler(request, response) {
             const identifier = request.url.slice(1);
 
             if (!Object.keys(endpoints).includes(identifier)) { // e.g. to exclude "__proto__"
-                response.writeHead(400);
-                response.end("invalid endpoint");
+                response.end(JSON.stringify({ error: "invalid endpoint" }));
                 return;
             }
 
             const handler = endpoints[identifier];
-            if (!handler) {
-                response.writeHead(400);
-                response.end("invalid endpoint");
+            const buffer = Buffer.concat(chunks);
+
+            let data;
+            try {
+                data = JSON.parse(buffer.toString());
+            } catch (err) {
+                response.end(JSON.stringify({ error: "invalid input data" }));
                 return;
             }
-            
+
             try {
-                const buffer = Buffer.concat(chunks);
-                const data = JSON.parse(buffer.toString());
                 const result = await handler(data);
-                if (result) {
-                    response.writeHead(200, { "content-type": "application/json" });
-                    response.end(JSON.stringify(result));
-                } else {
-                    response.writeHead(400);
-                    response.end("result is null");
-                }
+                response.writeHead(200, { "content-type": "application/json" });
+                response.end(JSON.stringify({ value: result }));
             } catch (err) {
-                console.log("Handler error:", err);
-                response.writeHead(400);
-                response.end("error invoking endpoint handler");
+                console.log("API Error:", err);
+                response.writeHead(200, { "content-type": "application/json" });
+                response.end(JSON.stringify({ error: err.message }));
             }
         });
         
         request.on("error", () => {
-            response.writeHead(500);
-            response.end("error code 500");
+            response.end(JSON.stringify({ error: "request error" }));
         });
     } else {
-        response.writeHead(405);
-        response.end("error code 405");
+        response.end(JSON.stringify({ error: "invalid http method" }));
     }
 }
