@@ -20,12 +20,12 @@ function Suggestions({ type, query, onSelect }) {
                         : await request("searchSeries", { query });
                 }
                 if (type === "movies") {
-                    if (!CACHE_POPULAR_MOVIES) {
+                    if (!CACHE_POPULAR_MOVIES || CACHE_POPULAR_MOVIES.length === 0) {
                         CACHE_POPULAR_MOVIES = await request("getPopularMovies");
                     }
                     return CACHE_POPULAR_MOVIES;
                 } else {
-                    if (!CACHE_POPULAR_SERIES) {
+                    if (!CACHE_POPULAR_SERIES || CACHE_POPULAR_SERIES.length === 0) {
                         CACHE_POPULAR_SERIES = await request("getPopularSeries");
                     }
                     return CACHE_POPULAR_SERIES;

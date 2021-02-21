@@ -25,14 +25,18 @@ async function search(title) {
 async function getMovieUrls({ title, year }) {
     const list = await search(title);
 
-    const seasonHash = list.find((x) => {
+    const filteredList = list.map((x) => {
         const released = parseInt(x.released?.slice(0, 4));
-        if (!isNaN(released) && !tools.windowRange(released, year, 1)) return false;
+        if (!isNaN(released) && !tools.windowRange(released, year, 1)) return null;
         const index = x.name.indexOf(" - Season ");
-        if (index >= 0) return false;
+        if (index >= 0) return null;
         const name = x.name;
-        return tools.areTitlesEqual(title, name);
-    })?.hash;
+        return { name, hash: x.hash };
+    }).filter((x) => x);
+
+    const seasonHash = filteredList.find((x) => tools.areTitlesEqual(x.name, title))?.hash
+        ?? filteredList.find((x) => tools.isTitleIncluded(x.name, title))?.hash;
+    
     if (!seasonHash) return [];
 
     const seasonUrl = `${ORIGIN}/contents/episodes?hash=${seasonHash}&${SITE_PARAM}`;
@@ -73,13 +77,17 @@ async function getMovieUrls({ title, year }) {
 async function getSeriesUrls({ title, season, episode }) {
     const list = await search(title);
 
-    const seasonHash = list.find((x) => {
+    const filteredList = list.map((x) => {
         const [name, seasonString] = x.name.split(" - Season ");
-        if (!name || !seasonString) return false;
+        if (!name || !seasonString) return null;
         const seasonNumber = parseInt(seasonString);
-        if (isNaN(seasonNumber)) return false;
-        return tools.areTitlesEqual(title, name) && season === seasonNumber;
-    })?.hash;
+        if (isNaN(seasonNumber)) return null;
+        return season === seasonNumber ? { name, hash: x.hash, } : null;
+    }).filter((x) => x);
+
+    const seasonHash = filteredList.find((x) => tools.areTitlesEqual(x.name, title))?.hash
+        ?? filteredList.find((x) => tools.isTitleIncluded(x.name, title))?.hash;
+
     if (!seasonHash) return [];
 
     const seasonUrl = `${ORIGIN}/contents/episodes?hash=${seasonHash}&${SITE_PARAM}`;
@@ -95,13 +103,13 @@ async function getSeriesUrls({ title, season, episode }) {
     if (!episodeHash) return [];
 
     const episodeUrl = `${ORIGIN}/episodes/embeds?hash=${episodeHash}&${SITE_PARAM}`;
-
+    
     data = await tools.getJson(episodeUrl);
     if (!data || data.embeds?.length === 0) return [];
 
     const providers = await Promise.all(data.embeds.map(async (x) => {
         const url = `${ORIGIN}/embed?hash=${x.hash}&${SITE_PARAM}`;
-
+        
         const data = await tools.getJson(url);
         if (!data || !data.url) return null;
 

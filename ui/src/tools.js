@@ -28,7 +28,7 @@ export async function request(endpoint, data = {}) {
         
         return result;
     } catch (err) {
-        console.log("Request Error:", err.message);
+        console.log(`Error calling '/${endpoint}':`, err.message);
         return { error: true };
     }
 }

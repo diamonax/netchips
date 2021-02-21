@@ -8,6 +8,7 @@ module.exports = {
     cheerio,
 
     areTitlesEqual,
+    isTitleIncluded,
     normalizeTitle,
 
     windowRange,
@@ -22,6 +23,10 @@ module.exports = {
 
 function areTitlesEqual(title1, title2) {
     return normalizeTitle(title1) === normalizeTitle(title2);
+}
+
+function isTitleIncluded(name, title) {
+    return normalizeTitle(name).includes(normalizeTitle(title));
 }
 
 function normalizeTitle(title) {

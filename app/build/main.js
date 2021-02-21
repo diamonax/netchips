@@ -78,7 +78,7 @@ async function startApp() {
     
     window.loadURL(`file:///${localHtmlFile}#${serverOrigin}`);
     window.setMenu(null);
-    window.openDevTools();
+    //window.openDevTools();
 
     window.once("ready-to-show", () => {
         window.show();

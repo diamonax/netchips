@@ -103,7 +103,7 @@ function ProvidersOverlay({ resource: { type, title, year, season, episode }, on
         if (urls?.length === 0 && torrents?.length === 0) {
             return (
                 <div className="overlay-error">
-                    Geen video's gevonden voor <b>{title} ({getSeasonEpisodeLabel(season, episode)})</b>
+                    Geen video's gevonden voor <b>{title}{type === "movies" ? "" : ` (${getSeasonEpisodeLabel(season, episode)})`}</b>
                 </div>
             );
         }
