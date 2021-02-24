@@ -54,7 +54,7 @@ function showVlcNotFoundPopup() {
 }
 
 async function startApp() {
-    const api = require("../../api/build");
+    const api = require("../../api/build");  // important for update to require here
     const port = await api.startServer(0);
 
     const window = new electron.BrowserWindow({
