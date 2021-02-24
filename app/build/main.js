@@ -4,7 +4,6 @@ const vlcCommand = require("vlc-command");
 
 const updater = require("./updater");
 const player = require("./player");
-const api = require("../../api/build");
 
 electron.app.on("window-all-closed", () => {
     electron.app.quit();
@@ -55,6 +54,7 @@ function showVlcNotFoundPopup() {
 }
 
 async function startApp() {
+    const api = require("../../api/build");
     const port = await api.startServer(0);
 
     const window = new electron.BrowserWindow({
