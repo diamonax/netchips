@@ -31,6 +31,12 @@ async function getPopular(url) {
     const table = $("tbody.lister-list").eq(0);
     $("tr", table).each((i, tr) => {
         const tds = $("td", tr);
+
+        const td2 = tds.eq(2);
+        if (td2?.text().trim() === "") {
+            return; // no rating, so not available yet
+        }
+
         const td0 = tds.eq(0);
         let image = $("img", td0).eq(0).attr("src");
         if (image.indexOf("/nopicture/") >= 0) {

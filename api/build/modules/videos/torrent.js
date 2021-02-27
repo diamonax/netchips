@@ -15,8 +15,11 @@ async function getMovieTorrents({ title, year }) {
 
     const data = await tools.getJson(url);
 
-    const entry = data.data?.movies?.find((x) => tools.windowRange(year, x.year, 1));
-    const torrents = entry?.torrents ?? data.data?.movies?.[0]?.torrents;
+    const entry = data.data?.movies?.find((x) => tools.windowRange(year, x.year, 1))
+        // ?? data.data?.movies?.find((x) => tools.areTitlesEqual(title, x.title))
+        // ?? data.data?.movies?.[0];
+
+    const torrents = entry?.torrents;
     
     if (!torrents) {
         throw new Error(`no 'torrents' in fetched json for movie torrents url: ${url}`);
