@@ -11,15 +11,17 @@ const ORIGIN = Buffer.from("aHR0cHM6Ly9hcGkuMTIzbW92aWUuc2hvdw==", "base64").toS
 const SITE_PARAM = "site=30802b";
 
 async function search(title) {
-    const query = encodeURIComponent(tools.normalizeTitle(title));
-    const url = `${ORIGIN}/search?keyword=${query}&${SITE_PARAM}`;
-
-    const data = await tools.getJson(url);
-    if (data.contents?.length === 0) {
-        throw new Error(`no 'contents' in fetched json for url: ${url}`);
-    }
-
-    return data.contents;
+    // const query = encodeURIComponent(tools.normalizeTitle(title));
+    // const url = `${ORIGIN}/search?keyword=${query}&${SITE_PARAM}`;
+    // 
+    // const data = await tools.getJson(url);
+    // if (data.contents?.length === 0) {
+    //     throw new Error(`no 'contents' in fetched json for url: ${url}`);
+    // }
+    // 
+    // return data.contents;
+ 
+    return []; // TODO: add new direct provider, current ORIGIN is no longer operational
 }
 
 async function getMovieUrls({ title, year }) {
