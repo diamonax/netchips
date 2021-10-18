@@ -2,6 +2,7 @@
     "dependencies": {
         "adm-zip": "0.5.1",
         "cheerio": "1.0.0-rc.5",
-        "lodash": "4.17.20"
+        "lodash": "4.17.20",
+        "torrent-search-api": "^2.1.4"
     }
 }

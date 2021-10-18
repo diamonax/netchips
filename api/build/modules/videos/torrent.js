@@ -1,4 +1,5 @@
 const _ = require("lodash");
+const torrentSearchApi = require("torrent-search-api");
 const tools = require("../tools.js");
 
 module.exports = {
@@ -6,10 +7,50 @@ module.exports = {
     getSeriesTorrents,
 };
 
+async function getMovieTorrents({ title, year }) {
+    title = tools.normalizeTitle(title);
+    const query = title;
+    
+    torrentSearchApi.enablePublicProviders();
+    torrentSearchApi.disableProvider("Torrent9");
+
+    const torrents = (await Promise.all(["Video", "Movies"].map(async (x) => {
+        return await torrentSearchApi.search(query, x, 1);
+    }))).flat();
+
+    const torrent = torrents.sort((a, b) => (b.seeds + b.peers) - (a.seeds + a.peers))[0];
+    const magnet = await torrentSearchApi.getMagnet(torrent);
+    
+    return [{
+        quality: "1080p",
+        url: magnet,
+    }];
+}
+
+async function getSeriesTorrents({ title, season, episode }) {
+    title = tools.normalizeTitle(title);
+    const query = `${title} S${season < 10 ? "0" : ""}${season}E${episode < 10 ? "0" : ""}${episode}`;
+
+    torrentSearchApi.enablePublicProviders();
+    torrentSearchApi.disableProvider("Torrent9");
+
+    const torrents = (await Promise.all(["Video", "Movies", "TV"].map(async (x) => {
+        return await torrentSearchApi.search(query, x, 1);
+    }))).flat();
+
+    const torrent = torrents.sort((a, b) => (b.seeds + b.peers) - (a.seeds + a.peers))[0];
+    const magnet = await torrentSearchApi.getMagnet(torrent);
+    
+    return [{
+        quality: "1080p",
+        url: magnet,
+    }];
+}
+
 const MOVIES_ORIGIN = Buffer.from("aHR0cHM6Ly95dHMubXg=", "base64").toString();
 const SERIES_ORIGIN = Buffer.from("aHR0cHM6Ly90di12Mi5hcGktZmV0Y2guc2g=", "base64").toString();
 
-async function getMovieTorrents({ title, year }) {
+async function getMovieTorrents2({ title, year }) {
     const query = encodeURIComponent(tools.normalizeTitle(title));
     const url = `${MOVIES_ORIGIN}/api/v2/list_movies.json?query_term=${query}`;
 
@@ -37,7 +78,7 @@ async function getMovieTorrents({ title, year }) {
     });
 }
 
-async function getSeriesTorrents({ title, season, episode }) {
+async function getSeriesTorrents2({ title, season, episode }) {
     const query = encodeURIComponent(tools.normalizeTitle(title));
     let url = `${SERIES_ORIGIN}/shows/1?keywords=${query}`;
 

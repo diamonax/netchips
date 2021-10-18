@@ -208,24 +208,25 @@ async function getMovieInformation({ url }, searchingSeries = false) {
         }
     }
 
-    const image = $("div.poster img").eq(0).attr("src")
+    const image = $("img.ipc-image").eq(0).attr("src")
         .replace(/_U(X|Y)\d+_/g, "_UX320_")
         .replace(/_CR\d+,\d+,\d+,\d+_/g, "_CR,,320,440_");
 
-    const ratingText = $("span[itemprop='ratingValue']").eq(0).text().replace(/,/g, ".").trim();
+    const ratingText = $("div[data-testid='hero-rating-bar__aggregate-rating'] span").eq(0).text().replace(/,/g, ".").trim();
     let rating = parseFloat(ratingText);
     if (isNaN(rating)) {
         rating = 0;
     }
 
-    const durationText = $("time").eq(1).text().replace("min", "").trim();
-    let duration = parseInt(durationText);
+    const durationText = $("ul[data-testid='hero-title-block__metadata'] li").eq(2).text().replace("min", "").replace("h", "*60+");
+    let duration = Number.NaN;
+    try { duration = eval(durationText); } catch (err) {}
     if (isNaN(duration)) {
         duration = 0;
     }
 
     const genres = [];
-    $(".subtext a").each((i, a) => {
+    $("div[data-testid='genres'] a").each((i, a) => {
         const href = $(a).attr("href");
         if (href.indexOf("genre") >= 0) {
             const genre = $(a).text().toLowerCase().trim();
@@ -233,7 +234,7 @@ async function getMovieInformation({ url }, searchingSeries = false) {
         }
     });
 
-    const description = $("div.summary_text").eq(0).text().trim();
+    const description = $("span[data-testid='plot-l']").eq(0).text().trim();
     // const cover = $("div.slate img").eq(0).attr("src");
 
     return {
